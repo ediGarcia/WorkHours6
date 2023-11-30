@@ -1,0 +1,55 @@
+﻿<Window x:Class="WorkHours6.TimeSheetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WorkHours6"
+        xmlns:controls="clr-namespace:WorkHours6.Controls"
+        mc:Ignorable="d"
+        Title="Work Hours 6" Height="500" Width="600"
+        ResizeMode="NoResize"
+        Closing="TimeSheetWindow_OnClosing"
+        WindowStartupLocation="CenterScreen">
+    <Grid
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:TimeSheetWindow}}">
+        <Grid.Resources>
+            <Style
+                TargetType="Button"
+                BasedOn="{StaticResource {x:Type Button}}">
+                <Setter
+                    Property="Width"
+                    Value="100" />
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition
+                Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <controls:TimeEditorMonth
+            x:Name="TemCalendar"
+            Grid.Row="0"
+            Margin="0, 0, 0, 10"
+            ShowDecimalValues="{Binding IsChecked, ElementName=CbxDecimalValues}"
+            MonthChanging="TemCalendar_MonthChanging"/>
+
+        <Grid
+            Grid.Row="1"
+            Margin="10">
+            <Button
+                Content="Go to Today"
+                HorizontalAlignment="Left"
+                Click="BtnGoToToday_OnClick" />
+            <CheckBox
+                x:Name="CbxDecimalValues"
+                Content="Show decimal values"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+            <Button
+                Content="Close"
+                HorizontalAlignment="Right"
+                Click="BtnOk_OnClick" />
+        </Grid>
+    </Grid>
+</Window>

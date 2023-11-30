@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="WorkHours6.Controls.CloseButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="40"
+             Height="30" Width="40">
+    <Button
+        ToolTip="Close"
+        Click="BtnCloseButton_OnClick">
+        <Button.Style>
+            <Style
+                TargetType="Button"
+                BasedOn="{StaticResource HardCornerButton}">
+                <Style.Triggers>
+                    <Trigger
+                        Property="IsMouseOver"
+                        Value="True">
+                        <Setter
+                            Property="Background"
+                            Value="Red" />
+                        <Setter
+                            Property="Foreground"
+                            Value="{DynamicResource AlternativeForeground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+        <Path
+            Data="M0,0 L10,10 M10,0 L0,10"
+            Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+    </Button>
+</UserControl>

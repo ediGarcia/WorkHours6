@@ -1,0 +1,349 @@
+﻿<Application x:Class="WorkHours6.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:WorkHours6.Controls"
+             xmlns:services="clr-namespace:WorkHours6.Services"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!--#region Solid Color Brush* -->
+
+        <SolidColorBrush
+            x:Key="AlternativeForeground">
+            White
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="DefaultBorderBrush">
+            DarkGray
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="DefaultBackground">
+            White
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="DefaultForeground">
+            Black
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="HighlightedBorderBrush">
+            LightBlue
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="HighlightedButtonBackground">
+            #40FFFFFF
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="HighlightedSelectedButtonBackground">
+            #80FFFFFF
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="LightForeground">
+            White
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="SaturdayBrush">
+            DodgerBlue
+        </SolidColorBrush>
+
+        <SolidColorBrush
+            x:Key="SundayBrush">
+            OrangeRed
+        </SolidColorBrush>
+
+        <!--#endregion-->
+
+        <!--#region Thickness -->
+
+        <CornerRadius
+            x:Key="DefaultCornerRadius">
+            5
+        </CornerRadius>
+
+        <!--#endregion-->
+
+        <!--#region Border* -->
+        <Style
+            TargetType="Border">
+            <Setter
+                Property="BorderBrush"
+                Value="{DynamicResource DefaultBorderBrush}" />
+        </Style>
+
+        <Style
+            x:Key="PopupBorder"
+            TargetType="Border"
+            BasedOn="{StaticResource {x:Type Border}}">
+            <Setter
+                Property="Background"
+                Value="{DynamicResource DefaultBackground}" />
+            <Setter
+                Property="BorderThickness"
+                Value="1" />
+            <Setter
+                Property="CornerRadius"
+                Value="5" />
+            <Setter
+                Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect
+                        BlurRadius="3" />
+                </Setter.Value>
+            </Setter>
+            <Setter
+                Property="Padding"
+                Value="5" />
+        </Style>
+        <!--#endregion-->
+
+        <!--#region Button* -->
+
+        <Style
+            TargetType="Button">
+            <Setter
+                Property="BorderThickness"
+                Value="0" />
+            <Setter
+                Property="Foreground"
+                Value="{DynamicResource DefaultForeground}" />
+            <Setter
+                Property="Padding"
+                Value="5" />
+
+            <Setter
+                Property="Template">
+                <Setter.Value>
+                    <ControlTemplate
+                        TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{DynamicResource DefaultCornerRadius}"
+                            Margin="{TemplateBinding Margin}"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger
+                    Property="IsMouseOver"
+                    Value="True">
+                    <Setter
+                        Property="Background"
+                        Value="{x:Static services:SettingsService.ThemeBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style
+            x:Key="HardCornerButton"
+            TargetType="Button"
+            BasedOn="{StaticResource {x:Type Button}}">
+            <Setter
+                Property="Background"
+                Value="Transparent" />
+
+            <Setter
+                Property="Template">
+                <Setter.Value>
+                    <ControlTemplate
+                        TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Margin="{TemplateBinding Margin}"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger
+                    Property="IsMouseOver"
+                    Value="True">
+                    <Setter
+                        Property="Background"
+                        Value="{x:Static services:SettingsService.ThemeBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style
+            x:Key="RoundButton"
+            TargetType="Button"
+            BasedOn="{StaticResource {x:Type Button}}">
+            <Setter
+                Property="Padding"
+                Value="0" />
+
+            <Setter
+                Property="Template">
+                <Setter.Value>
+                    <ControlTemplate
+                        TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Margin="{TemplateBinding Margin}"
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="2000">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger
+                    Property="IsMouseOver"
+                    Value="True">
+                    <Setter
+                        Property="Background"
+                        Value="{DynamicResource HighlightedButtonBackground}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--#endregion-->
+
+        <!--#region Path -->
+        <Style
+            x:Key="ButtonIcon"
+            TargetType="Path">
+            <Setter
+                Property="Margin"
+                Value="5" />
+            <Setter
+                Property="HorizontalAlignment"
+                Value="Center" />
+            <Setter
+                Property="VerticalAlignment"
+                Value="Center" />
+        </Style>
+        <!--#endregion-->
+
+        <!--#region Popup -->
+        <Style
+            TargetType="Popup">
+            <Setter
+                Property="AllowsTransparency"
+                Value="True" />
+            <Setter
+                Property="PopupAnimation"
+                Value="Fade" />
+        </Style>
+        <!--#endregion-->
+
+        <!--#region TimePicker -->
+        <Style
+            TargetType="controls:TimePicker">
+            <Setter
+                Property="VerticalAlignment"
+                Value="Center" />
+        </Style>
+        <!--#endregion-->
+
+        <!--#region ToggleButton -->
+
+        <Style
+            x:Key="RoundToggleButton"
+            TargetType="ToggleButton">
+            <Setter
+                Property="Background"
+                Value="Transparent" />
+            <Setter
+                Property="BorderThickness"
+                Value="0" />
+            <Setter
+                Property="Height"
+                Value="20" />
+            <Setter
+                Property="Padding"
+                Value="0"></Setter>
+            <Setter
+                Property="Width"
+                Value="20" />
+
+            <Setter
+                Property="Template">
+                <Setter.Value>
+                    <ControlTemplate
+                        TargetType="ToggleButton">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="2000"
+                            Margin="{TemplateBinding Margin}"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter
+                                Content="{TemplateBinding Content}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition
+                            Property="IsChecked"
+                            Value="True" />
+                        <Condition
+                            Property="IsMouseOver"
+                            Value="True" />
+                    </MultiTrigger.Conditions>
+                    <Setter
+                        Property="Background"
+                        Value="{DynamicResource HighlightedSelectedButtonBackground}" />
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition
+                            Property="IsChecked"
+                            Value="True" />
+                        <Condition
+                            Property="IsMouseOver"
+                            Value="False" />
+                    </MultiTrigger.Conditions>
+                    <Setter
+                        Property="Background"
+                        Value="{DynamicResource HighlightedButtonBackground}" />
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition
+                            Property="IsChecked"
+                            Value="False" />
+                        <Condition
+                            Property="IsMouseOver"
+                            Value="True" />
+                    </MultiTrigger.Conditions>
+                    <Setter
+                        Property="Background"
+                        Value="{DynamicResource HighlightedButtonBackground}" />
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--#endregion-->
+    </Application.Resources>
+</Application>

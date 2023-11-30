@@ -1,0 +1,377 @@
+﻿<Window x:Class="WorkHours6.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WorkHours6"
+        xmlns:controls="clr-namespace:WorkHours6.Controls"
+        xmlns:services="clr-namespace:WorkHours6.Services"
+        mc:Ignorable="d"
+        Title="Work Hours 6"
+        Height="{x:Static services:SettingsService.WindowHeight}"
+        Width="{x:Static services:SettingsService.WindowWidth}"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        FontSize="14"
+        Topmost="{Binding IsTopMost, Source={x:Static services:SettingsService.UserSettings}}"
+        Closing="MainWindow_Closing">
+    <Grid
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+        <controls:TimeSpanProgressBar
+            x:Name="TpbProgressBar"
+            Background="{x:Static services:SettingsService.ThemeBrush}"
+            CurrentTime="{Binding WorkTimeService.WorkedHours}"
+            ExpectedExitTime="{Binding WorkTimeService.ExpectedExitTime}"
+            ProgressBackground="{x:Static services:SettingsService.ThemeAccentBrush}"
+            TotalTime="{Binding WorkTimeService.ExpectedWorkHours}"
+            Click="TimeSpanProgressBar_Click">
+            <controls:TimeSpanProgressBar.ContextMenu>
+                <ContextMenu>
+                    <MenuItem
+                        Click="MniSetTime_OnClick">
+                        <MenuItem.Style>
+                            <Style
+                                TargetType="MenuItem">
+                                <Setter
+                                    Property="Header"
+                                    Value="Start at..." />
+                                <Setter
+                                    Property="Icon">
+                                    <Setter.Value>
+                                        <Path
+                                            Data="M6.4,4.11V15.31L15.2,9.71L6.4,4.11Z"
+                                            Fill="Green" />
+                                    </Setter.Value>
+                                </Setter>
+
+                                <Style.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding WorkTimeService.IsTimerRunning}"
+                                        Value="True">
+                                        <Setter
+                                            Property="Header"
+                                            Value="Stop at..." />
+                                        <Setter
+                                            Property="Icon">
+                                            <Setter.Value>
+                                                <Rectangle
+                                                    Fill="Red"
+                                                    Height="10"
+                                                    Width="10" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem
+                        Header="Reset time"
+                        Click="MniResetTime_OnClick">
+                        <MenuItem.Icon>
+                            <Path
+                                Data="M9.6,3.2C11.28,3.2 12.88,3.84 14.08,5.04C16.56,7.52 16.56,11.6 14.08,14.08C12.64,15.6 10.64,16.16 8.72,15.92L9.12,14.32C10.48,14.48 11.92,14 12.96,12.96C14.8,11.12 14.8,8.08 12.96,6.16C12.08,5.28 10.8,4.8 9.6,4.8V8.48L5.6,4.48L9.6,0.48V3.2M5.04,14.08C2.96,12 2.64,8.8 4.08,6.32L5.28,7.52C4.4,9.28 4.72,11.52 6.24,12.96C6.64,13.36 7.12,13.68 7.68,13.92L7.2,15.52C6.4,15.2 5.68,14.72 5.04,14.08Z"
+                                Fill="DodgerBlue" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </controls:TimeSpanProgressBar.ContextMenu>
+            <controls:TimeSpanProgressBar.Style>
+                <Style
+                    TargetType="controls:TimeSpanProgressBar">
+                    <Setter
+                        Property="ToolTip"
+                        Value="Click to start." />
+
+                    <Style.Triggers>
+                        <DataTrigger
+                            Binding="{Binding WorkTimeService.IsTimerRunning}"
+                            Value="True">
+                            <Setter
+                                Property="ToolTip"
+                                Value="Click to stop." />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </controls:TimeSpanProgressBar.Style>
+        </controls:TimeSpanProgressBar>
+
+        <StackPanel
+            HorizontalAlignment="Left"
+            Margin="10"
+            VerticalAlignment="Center">
+            <Button
+                x:Name="BtnSettings"
+                ToolTip="Settings"
+                Click="BtnSettings_OnClick">
+                <Button.Style>
+                    <Style
+                        TargetType="Button"
+                        BasedOn="{StaticResource RoundButton}">
+                        <Setter
+                            Property="Background"
+                            Value="Transparent" />
+                        <Setter
+                            Property="Opacity"
+                            Value="0" />
+
+                        <Style.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsSettingsWindowOpened}"
+                                Value="True">
+                                <Setter
+                                    Property="Background"
+                                    Value="{DynamicResource HighlightedButtonBackground}" />
+                                <Setter
+                                    Property="Opacity"
+                                    Value="1" />
+                            </DataTrigger>
+                            <DataTrigger
+                                Binding="{Binding IsMouseOver}"
+                                Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                To="1"
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition
+                                        Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}"
+                                        Value="True" />
+                                    <Condition
+                                        Binding="{Binding IsSettingsWindowOpened}"
+                                        Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter
+                                    Property="Background"
+                                    Value="{DynamicResource HighlightedSelectedButtonBackground}" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Path
+                    Data="M6,7.75A1.75,1.75 0 0,1 4.25,6A1.75,1.75 0 0,1 6,4.25A1.75,1.75 0 0,1 7.75,6A1.75,1.75 0 0,1 6,7.75M9.72,6.49C9.74,6.33 9.75,6.17 9.75,6C9.75,5.84 9.74,5.67 9.72,5.5L10.77,4.69C10.87,4.61 10.89,4.48 10.83,4.37L9.83,2.64C9.77,2.53 9.64,2.48 9.53,2.53L8.28,3.03C8.02,2.83 7.75,2.66 7.44,2.54L7.25,1.21C7.23,1.09 7.13,1 7,1H5C4.88,1 4.77,1.09 4.75,1.21L4.57,2.54C4.25,2.66 3.98,2.83 3.72,3.03L2.48,2.53C2.37,2.48 2.23,2.53 2.17,2.64L1.17,4.37C1.11,4.48 1.14,4.61 1.23,4.69L2.29,5.5C2.27,5.67 2.25,5.84 2.25,6C2.25,6.17 2.27,6.33 2.29,6.49L1.23,7.32C1.14,7.39 1.11,7.53 1.17,7.64L2.17,9.37C2.23,9.48 2.37,9.52 2.48,9.48L3.72,8.97C3.98,9.17 4.25,9.34 4.57,9.47L4.75,10.79C4.77,10.91 4.88,11 5,11H7C7.13,11 7.23,10.91 7.25,10.79L7.44,9.47C7.75,9.34 8.02,9.17 8.28,8.97L9.53,9.48C9.64,9.52 9.77,9.48 9.83,9.37L10.83,7.64C10.89,7.53 10.87,7.39 10.77,7.32L9.72,6.49Z"
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                    Style="{DynamicResource ButtonIcon}"/>
+            </Button>
+            <Button
+                x:Name="BtnTimeSheet"
+                Margin="0, 2.5"
+                ToolTip="Time Sheet"
+                Click="BtnTimeSheet_OnClick">
+                <Button.Style>
+                    <Style
+                        TargetType="Button"
+                        BasedOn="{StaticResource RoundButton}">
+                        <Setter
+                            Property="Background"
+                            Value="Transparent" />
+                        <Setter
+                            Property="Opacity"
+                            Value="0" />
+
+                        <Style.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsTimeSheetOpened}"
+                                Value="True">
+                                <Setter
+                                    Property="Background"
+                                    Value="{DynamicResource HighlightedButtonBackground}" />
+                                <Setter
+                                    Property="Opacity"
+                                    Value="1" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsMouseOver}"
+                                Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                To="1"
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition
+                                        Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}"
+                                        Value="True" />
+                                    <Condition
+                                        Binding="{Binding IsTimeSheetOpened}"
+                                        Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter
+                                    Property="Background"
+                                    Value="{DynamicResource HighlightedSelectedButtonBackground}" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Path
+                    Data="M10.5 8.5V4H3.5V8.5H10.5M10.5 1.5C11.05 1.5 11.5 1.95 11.5 2.5V8.5C11.5 9.05 11.05 9.5 10.5 9.5H3.5C2.95 9.5 2.5 9.05 2.5 8.5V2.5C2.5 1.95 2.95 1.5 3.5 1.5H4V1H5V1.5H9V1H10V1.5H10.5M1.5 10.5H8.5V11.5H1.5C0.95 11.5 1 11.05 1 10.5V4.5H1.5V10.5Z"
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                    Style="{DynamicResource ButtonIcon}"/>
+            </Button>
+            <ToggleButton
+                x:Name="TbnTopMost"
+                IsChecked="{Binding IsTopMost, Source={x:Static services:SettingsService.UserSettings}}"
+                ToolTip="Stay on top">
+                <ToggleButton.Style>
+                    <Style
+                        TargetType="ToggleButton"
+                        BasedOn="{StaticResource RoundToggleButton}">
+                        <Setter
+                            Property="Opacity"
+                            Value="0" />
+
+                        <Style.Triggers>
+                            <Trigger
+                                Property="IsChecked"
+                                Value="True">
+                                <Setter
+                                    Property="Opacity"
+                                    Value="1" />
+                            </Trigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsMouseOver}"
+                                Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                To="1"
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard
+                                            TargetProperty="Opacity">
+                                            <DoubleAnimation
+                                                Duration="00:00:00.250" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+                <Path
+                    Data="M8,6V2H8.5V1H3.5V2H4V6L3,7V8H5.6V11H6.4V8H9V7L8,6Z"
+                    Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                    Margin="-3, 0, 0, 0"/>
+            </ToggleButton>
+        </StackPanel>
+
+        <controls:CloseButton
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top" />
+
+        <Popup
+            x:Name="PopSetTime"
+            Height="{Binding ActualHeight}"
+            Placement="Center"
+            Width="{Binding ActualWidth}">
+            <Border
+                Background="#70000000"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="Visible">
+                <Border
+                    Background="White"
+                    HorizontalAlignment="Center"
+                    Style="{DynamicResource PopupBorder}"
+                    VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0">
+                            <TextBlock.Style>
+                                <Style
+                                    TargetType="TextBlock">
+                                    <Setter
+                                        Property="Text"
+                                        Value="Select the start time:" />
+
+                                    <Style.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding WorkTimeService.IsTimerRunning}"
+                                            Value="True">
+                                            <Setter
+                                                Property="Text"
+                                                Value="Select the stop time:" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <controls:TimePicker
+                            x:Name="TpkTimePicker"
+                            Grid.Row="1"
+                            Margin="0, 5"
+                            Minimum="{Binding WorkTimeService.LastStateChangeTime.TimeOfDay}" />
+
+                        <Grid
+                            Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                Grid.Column="0"
+                                Content="OK"
+                                Margin="0, 0, 2.5, 0"
+                                Click="BtnOkPopup_OnClick" />
+                            <Button
+                                Grid.Column="1"
+                                Content="Cancel"
+                                Margin="2.5, 0, 0, 0"
+                                Click="BtnClosePopup_OnClick" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Border>
+        </Popup>
+    </Grid>
+</Window>

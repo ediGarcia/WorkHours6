@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="WorkHours6.Controls.TimePicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WorkHours6.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="16" d:DesignWidth="50"
+             Background="Transparent"
+             GotFocus="TimePicker_OnGotFocus">
+    <Border
+        Background="White"
+        BorderThickness="1"
+        CornerRadius="3"
+        DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:TimePicker}}">
+        <Border.Style>
+            <Style
+                TargetType="Border"
+                BasedOn="{StaticResource {x:Type Border}}">
+                <Style.Triggers>
+                    <DataTrigger
+                        Binding="{Binding IsFocused, ElementName=TxbHours}"
+                        Value="True">
+                        <Setter
+                            Property="BorderBrush"
+                            Value="{DynamicResource HighlightedBorderBrush}" />
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding IsFocused, ElementName=TxbMinutes}"
+                        Value="True">
+                        <Setter
+                            Property="BorderBrush"
+                            Value="{DynamicResource HighlightedBorderBrush}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Grid.Resources>
+                <Style
+                    TargetType="TextBox">
+                    <Setter
+                        Property="Background"
+                        Value="Transparent" />
+                    <Setter
+                        Property="BorderThickness"
+                        Value="0" />
+                    <Setter
+                        Property="Foreground"
+                        Value="{Binding Foreground}" />
+                    <Setter
+                        Property="HorizontalAlignment"
+                        Value="Stretch" />
+                    <Setter
+                        Property="Text"
+                        Value="00" />
+                    <Setter
+                        Property="VerticalAlignment"
+                        Value="Stretch" />
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition
+                    Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBox
+                x:Name="TxbHours"
+                Grid.Column="0"
+                Text="{Binding SelectedTime, StringFormat='\{0:hh\}', Mode=OneWay}"
+                TextAlignment="Right"
+                LostFocus="TxbHours_OnLostFocus"
+                PreviewKeyDown="TxbHours_OnPreviewKeyDown"
+                PreviewTextInput="TxbTime_OnPreviewTextInput"/>
+
+            <TextBlock
+                Grid.Column="1"
+                Text=":"
+                VerticalAlignment="Center"/>
+
+            <TextBox
+                x:Name="TxbMinutes"
+                Grid.Column="2"
+                Text="{Binding SelectedTime, StringFormat='\{0:mm\}', Mode=OneWay}"
+                TextAlignment="Left"
+                LostFocus="TxbMinutes_OnLostFocus"
+                PreviewKeyDown="TxbMinutes_OnPreviewKeyDown"
+                PreviewTextInput="TxbTime_OnPreviewTextInput"/>
+        </Grid>
+    </Border>
+</UserControl>
