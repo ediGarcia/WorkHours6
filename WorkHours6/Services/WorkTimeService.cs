@@ -110,8 +110,8 @@ public class WorkTimeService : INotifyPropertyChanged
             _additionalWorkTime = databaseEntry.WorkedTime;
             _creditedHours = databaseEntry.CreditedHours;
 
-            if (databaseEntry.LastUpdateTime.HasValue)
-                ToggleTimer(databaseEntry.LastUpdateTime);
+            if (databaseEntry.LastStartTime.HasValue)
+                ToggleTimer(databaseEntry.LastStartTime);
         }
         catch { }
 

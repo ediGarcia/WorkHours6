@@ -217,11 +217,11 @@ public static class DataService
         using (SqliteCommand command = CreateCommand())
         {
             command.CommandText =
-                "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, NonProductiveSeconds=@NonProductiveSeconds WHERE Date=@Date";
+                "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds WHERE Date=@Date";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
             command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-            command.Parameters.AddWithValue("@NonProductiveSeconds", creditedSeconds);
+            command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
             updatedRows = command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -230,11 +230,11 @@ public static class DataService
         {
             using SqliteCommand command = CreateCommand();
             command.CommandText =
-                "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,NonProductiveSeconds) VALUES (@Date,@WorkedSeconds,@LastStartTime,@NonProductiveSeconds)";
+                "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,CreditedSeconds) VALUES (@Date,@WorkedSeconds,@LastStartTime,@CreditedSeconds)";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
             command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-            command.Parameters.AddWithValue("@NonProductiveSeconds", creditedSeconds);
+            command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -275,8 +275,8 @@ public static class DataService
         {
             Id = reader.GetInt32("Id"),
             WorkedTime = TimeSpan.FromSeconds(reader.GetInt32("WorkedSeconds")),
-            LastUpdateTime = reader["LastStartTime"] is DBNull ? null : reader.GetDateTime("LastStartTime"),
-            CreditedHours = TimeSpan.FromSeconds(reader.GetInt32("NonProductiveSeconds"))
+            LastStartTime = reader["LastStartTime"] is DBNull ? null : reader.GetDateTime("LastStartTime"),
+            CreditedHours = TimeSpan.FromSeconds(reader.GetInt32("CreditedSeconds"))
         };
     #endregion
 

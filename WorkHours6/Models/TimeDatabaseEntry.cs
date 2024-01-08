@@ -25,7 +25,7 @@ public class TimeDatabaseEntry
     /// <summary>
     /// Gets and sets the last update time of the current time entry.
     /// </summary>
-    public DateTime? LastUpdateTime { get; set; }
+    public DateTime? LastStartTime { get; set; }
 
     /// <summary>
     /// Gets and ste the stored worked hours of the current time entry.
@@ -54,7 +54,7 @@ public class TimeDatabaseEntry
         {
             CreditedHours = CreditedHours,
             Id = Id,
-            LastUpdateTime = LastUpdateTime,
+            LastStartTime = LastStartTime,
             WorkedTime = WorkedTime
         };
     #endregion

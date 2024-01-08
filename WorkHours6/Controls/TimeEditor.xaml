@@ -52,7 +52,7 @@
                         TargetType="Border">
                         <Style.Triggers>
                             <DataTrigger
-                                Binding="{Binding Data.LastUpdateTime}"
+                                Binding="{Binding Data.LastStartTime}"
                                 Value="{x:Null}">
                                 <Setter
                                     Property="Visibility"
@@ -75,7 +75,7 @@
                         <TextBlock
                             Text="Unfinished day. Last started at " />
                         <TextBlock
-                            Text="{Binding Data.LastUpdateTime, StringFormat='HH:mm.'}" />
+                            Text="{Binding Data.LastStartTime, StringFormat='HH:mm.'}" />
                     </StackPanel>
                 </Border.ToolTip>
 
