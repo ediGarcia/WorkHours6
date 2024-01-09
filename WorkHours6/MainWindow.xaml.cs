@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
-using HelperExtensions;
-using HelperMethods;
-using WorkHours6.Models;
 using WorkHours6.Services;
 #pragma warning disable CS8625
 #pragma warning disable CS8618
@@ -54,11 +49,6 @@ public partial class MainWindow : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets the service that calculates the worked hours.
-    /// </summary>
-    public WorkTimeService WorkTimeService { get; } = new();
-
     #endregion
 
     private bool _isSettingsWindowOpened;
@@ -70,7 +60,7 @@ public partial class MainWindow : INotifyPropertyChanged
     {
         InitializeComponent();
         AdjustWindowPosition();
-        UpdateBalance();
+        UpdateBalanceAndExtraHours();
 
         SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
     }
@@ -192,7 +182,7 @@ public partial class MainWindow : INotifyPropertyChanged
 
         IsTimeSheetOpened = false;
         WorkTimeService.UpdateCreditedHours();
-        UpdateBalance();
+        UpdateBalanceAndExtraHours();
     }
     #endregion
 
@@ -208,7 +198,7 @@ public partial class MainWindow : INotifyPropertyChanged
         _settingsWindow = null;
 
         IsSettingsWindowOpened = false;
-        UpdateBalance();
+        UpdateBalanceAndExtraHours();
     }
     #endregion
 
@@ -254,47 +244,10 @@ public partial class MainWindow : INotifyPropertyChanged
     /// <summary>
     /// Updates the balance and the extra hours information.
     /// </summary>
-    private void UpdateBalance()
+    private void UpdateBalanceAndExtraHours()
     {
-        UserSettings userSettings = SettingsService.UserSettings;
-
-        if (userSettings.BalanceStartDate < DateTime.Today)
-        {
-            TimeSpan eightHours = TimeSpan.FromHours(8);
-            List<TimeDatabaseEntry> entries = DataService.GetTimeEntries(
-                userSettings.BalanceStartDate,
-                DateTimeMethods.Max(
-                    DateTime.Today.AddDays(-1),
-                    userSettings.TargetBalanceDeadline));
-
-            TpbProgressBar.Balance =
-                DateTimeMethods.RoundToMinutes(
-                    entries
-                        .Where(_ => _.Date < DateTime.Today)
-                        .Sum(_ => _.WorkedTime + _.CreditedHours - eightHours));
-
-            if (userSettings.CalculateExtraHours
-                && TpbProgressBar.Balance != userSettings.TargetBalance
-                && userSettings.TargetBalanceDeadline >= DateTime.Today)
-            {
-                int workDaysCount = Int32.Max(
-                    entries.Count(_ => _.Date >= DateTime.Today && _.CreditedHours < eightHours),
-                    1);
-
-                TpbProgressBar.ExtraHours =
-                    DateTimeMethods.RoundToMinutes(
-                        (userSettings.TargetBalance - TpbProgressBar.Balance) / workDaysCount);
-            }
-            else
-                TpbProgressBar.ExtraHours = TimeSpan.Zero;
-        }
-        else
-        {
-            TpbProgressBar.Balance = TimeSpan.Zero;
-            TpbProgressBar.ExtraHours = TimeSpan.Zero;
-        }
-
-        WorkTimeService.ExtraHours = TpbProgressBar.ExtraHours;
+        WorkTimeService.UpdateCurrentBalance();
+        WorkTimeService.UpdateExtraHours();
     }
     #endregion
 

@@ -180,23 +180,27 @@ public static class DataService
     #region SaveTimeData*
 
     #region SaveTimeData(IList<DatabaseEntry>)
+
     /// <summary>
     /// Persists the specified time data into the database.
     /// </summary>
     /// <param name="entries"></param>
     public static void SaveTimeData(IList<TimeDatabaseEntry> entries) =>
-        entries.ForEach(_ => SaveTimeData(_.Date, _.WorkedTime, _.CreditedHours, false));
+        entries.ForEach(_ =>
+            SaveTimeData(_.Date, _.WorkedTime, _.CreditedHours, _.LastStartTime, false));
     #endregion
 
     #region SaveTimeData(DateTime, TimeSpan, TimeSpan, bool)
+
     /// <summary>
     /// Persists the specified time data to the database.
     /// </summary>
     /// <param name="date"></param>
     /// <param name="workedHours"></param>
     /// <param name="creditedHours"></param>
+    /// <param name="lastStartTime"></param>
     /// <param name="isTimerRunning"></param>
-    public static void SaveTimeData(DateTime date, TimeSpan workedHours, TimeSpan creditedHours, bool isTimerRunning)
+    public static void SaveTimeData(DateTime date, TimeSpan workedHours, TimeSpan creditedHours, DateTime? lastStartTime, bool isTimerRunning)
     {
         if (workedHours == TimeSpan.Zero && creditedHours == TimeSpan.Zero && !isTimerRunning)
         {
@@ -212,7 +216,7 @@ public static class DataService
         int updatedRows;
         double workedSeconds = Math.Round(workedHours.TotalSeconds);
         double creditedSeconds = Math.Round(creditedHours.TotalSeconds);
-        object lastStartTime = isTimerRunning ? DateTimeMethods.RoundToSeconds(DateTime.Now) : DBNull.Value;
+        object lastStartTimeData = isTimerRunning && lastStartTime.HasValue ? lastStartTime.Value : DBNull.Value;
 
         using (SqliteCommand command = CreateCommand())
         {
@@ -220,7 +224,7 @@ public static class DataService
                 "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds WHERE Date=@Date";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
+            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeData);
             command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
             updatedRows = command.ExecuteNonQuery();
             command.Connection.Close();

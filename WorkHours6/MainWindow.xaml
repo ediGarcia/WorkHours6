@@ -20,10 +20,12 @@
         <controls:TimeSpanProgressBar
             x:Name="TpbProgressBar"
             Background="{x:Static services:SettingsService.ThemeBrush}"
-            CurrentTime="{Binding WorkTimeService.WorkedHours}"
-            ExpectedExitTime="{Binding WorkTimeService.ExpectedExitTime}"
+            Balance="{Binding Balance, Source={x:Static services:WorkTimeService.WorkTime}}"
+            CurrentTime="{Binding WorkedHours, Source={x:Static services:WorkTimeService.WorkTime}}"
+            ExpectedExitTime="{Binding ExpectedExitTime, Source={x:Static services:WorkTimeService.WorkTime}}"
+            ExtraHours="{Binding ExtraHours, Source={x:Static services:WorkTimeService.WorkTime}}"
             ProgressBackground="{x:Static services:SettingsService.ThemeAccentBrush}"
-            TotalTime="{Binding WorkTimeService.ExpectedWorkHours}"
+            TotalTime="{Binding ExpectedWorkHours, Source={x:Static services:WorkTimeService.WorkTime}}"
             Click="TimeSpanProgressBar_Click">
             <controls:TimeSpanProgressBar.ContextMenu>
                 <ContextMenu>
@@ -46,7 +48,7 @@
 
                                 <Style.Triggers>
                                     <DataTrigger
-                                        Binding="{Binding WorkTimeService.IsTimerRunning}"
+                                        Binding="{Binding IsTimerRunning, Source={x:Static services:WorkTimeService.WorkTime}}"
                                         Value="True">
                                         <Setter
                                             Property="Header"
@@ -85,7 +87,7 @@
 
                     <Style.Triggers>
                         <DataTrigger
-                            Binding="{Binding WorkTimeService.IsTimerRunning}"
+                            Binding="{Binding IsTimerRunning, Source={x:Static services:WorkTimeService.WorkTime}}"
                             Value="True">
                             <Setter
                                 Property="ToolTip"
@@ -335,7 +337,7 @@
 
                                     <Style.Triggers>
                                         <DataTrigger
-                                            Binding="{Binding WorkTimeService.IsTimerRunning}"
+                                            Binding="{Binding IsTimerRunning, Source={x:Static services:WorkTimeService.WorkTime}}"
                                             Value="True">
                                             <Setter
                                                 Property="Text"
@@ -350,7 +352,7 @@
                             x:Name="TpkTimePicker"
                             Grid.Row="1"
                             Margin="0, 5"
-                            Minimum="{Binding WorkTimeService.LastStateChangeTime.TimeOfDay}" />
+                            Minimum="{Binding LastStateChangeTime.TimeOfDay, Source={x:Static services:WorkTimeService.WorkTime}}" />
 
                         <Grid
                             Grid.Row="2">
