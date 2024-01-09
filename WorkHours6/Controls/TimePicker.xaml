@@ -69,7 +69,7 @@
             <TextBox
                 x:Name="TxbHours"
                 Grid.Column="0"
-                Text="{Binding SelectedTime, StringFormat='\{0:hh\}', Mode=OneWay}"
+                Text="{Binding SelectedTime.TotalHours, StringFormat='{}{0:00}', Mode=OneWay}"
                 TextAlignment="Right"
                 LostFocus="TxbHours_OnLostFocus"
                 PreviewKeyDown="TxbHours_OnPreviewKeyDown"

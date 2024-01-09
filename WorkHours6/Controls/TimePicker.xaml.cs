@@ -169,7 +169,7 @@ public partial class TimePicker
     private void TxbMinutes_OnLostFocus(object sender, RoutedEventArgs e)
     {
         if (_timeChangedByTheUser && Int32.TryParse(TxbMinutes.Text, out int minutes))
-            SelectedTime = new TimeSpan(SelectedTime.Hours, minutes, 0);
+            SelectedTime = new(SelectedTime.Hours, minutes, 0);
 
         _timeChangedByTheUser = false;
     }
