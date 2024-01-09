@@ -40,7 +40,7 @@ public static class SettingsService
 
     static SettingsService()
     {
-        (string ThemeBrush, string themeAccentBrush)[] themes = {
+        (string ThemeBrush, string ThemeAccentBrush)[] themes = {
             ("#ecee81", "#9fa115"), // Yellow
             ("#89f3e4", "#11ac96"), // Green/Blue
             ("#82a4ff", "#0034c0"), // Blue
@@ -64,6 +64,6 @@ public static class SettingsService
         BrushConverter converter = new();
 
         ThemeBrush = (Brush)converter.ConvertFromString(themes[selectedThemeIndex].ThemeBrush);
-        ThemeAccentBrush = (Brush)converter.ConvertFromString(themes[selectedThemeIndex].themeAccentBrush);
+        ThemeAccentBrush = (Brush)converter.ConvertFromString(themes[selectedThemeIndex].ThemeAccentBrush);
     }
 }

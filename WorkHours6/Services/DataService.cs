@@ -180,7 +180,6 @@ public static class DataService
     #region SaveTimeData*
 
     #region SaveTimeData(IList<DatabaseEntry>)
-
     /// <summary>
     /// Persists the specified time data into the database.
     /// </summary>
@@ -190,8 +189,7 @@ public static class DataService
             SaveTimeData(_.Date, _.WorkedTime, _.CreditedHours, _.LastStartTime, false));
     #endregion
 
-    #region SaveTimeData(DateTime, TimeSpan, TimeSpan, bool)
-
+    #region SaveTimeData(DateTime, TimeSpan, TimeSpan, DateTime?, bool)
     /// <summary>
     /// Persists the specified time data to the database.
     /// </summary>
@@ -202,7 +200,9 @@ public static class DataService
     /// <param name="isTimerRunning"></param>
     public static void SaveTimeData(DateTime date, TimeSpan workedHours, TimeSpan creditedHours, DateTime? lastStartTime, bool isTimerRunning)
     {
-        if (workedHours == TimeSpan.Zero && creditedHours == TimeSpan.Zero && !isTimerRunning)
+        if (workedHours == TimeSpan.Zero
+            && (creditedHours == TimeSpan.Zero || creditedHours == WorkTimeService.EightHours && date.IsWeekend())
+            && !isTimerRunning)
         {
             using SqliteCommand command = CreateCommand();
             command.CommandText = "DELETE FROM TimeEntries WHERE Date=@Date";
@@ -216,7 +216,7 @@ public static class DataService
         int updatedRows;
         double workedSeconds = Math.Round(workedHours.TotalSeconds);
         double creditedSeconds = Math.Round(creditedHours.TotalSeconds);
-        object lastStartTimeData = isTimerRunning && lastStartTime.HasValue ? lastStartTime.Value : DBNull.Value;
+        object lastStartTimeValue = isTimerRunning && lastStartTime.HasValue ? lastStartTime.Value : DBNull.Value;
 
         using (SqliteCommand command = CreateCommand())
         {
@@ -224,7 +224,7 @@ public static class DataService
                 "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds WHERE Date=@Date";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeData);
+            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeValue);
             command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
             updatedRows = command.ExecuteNonQuery();
             command.Connection.Close();
@@ -237,7 +237,7 @@ public static class DataService
                 "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,CreditedSeconds) VALUES (@Date,@WorkedSeconds,@LastStartTime,@CreditedSeconds)";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
+            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeValue);
             command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
             command.ExecuteNonQuery();
             command.Connection.Close();

@@ -71,16 +71,11 @@ public static class WorkTimeService
     {
         WorkTime.WorkedHours = Stopwatch.Elapsed + _additionalWorkTime;
 
-        if (_currentDate != DateTime.Today)
+        if (_currentDate != DateTime.Today && WorkTime.IsTimerRunning)
         {
-            bool isTimerRunning = WorkTime.IsTimerRunning;
-
-            SaveData();
+            ToggleTimer();
             _currentDate = DateTime.Today;
             ResetTimer();
-
-            if (isTimerRunning)
-                ToggleTimer();
         }
     }
     #endregion
