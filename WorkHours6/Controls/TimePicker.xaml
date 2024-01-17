@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WorkHours6.Controls"
+             xmlns:infra="clr-namespace:WorkHours6.Infra"
              mc:Ignorable="d" 
              d:DesignHeight="16" d:DesignWidth="50"
              Background="Transparent"
@@ -37,6 +38,8 @@
         </Border.Style>
         <Grid>
             <Grid.Resources>
+                <infra:TruncateNumberConverter
+                    x:Key="TruncateNumberConverter" />
                 <Style
                     TargetType="TextBox">
                     <Setter
@@ -69,7 +72,7 @@
             <TextBox
                 x:Name="TxbHours"
                 Grid.Column="0"
-                Text="{Binding SelectedTime.TotalHours, StringFormat='{}{0:00}', Mode=OneWay}"
+                Text="{Binding SelectedTime.TotalHours, StringFormat='{}{0:00}', Mode=OneWay, Converter={StaticResource TruncateNumberConverter}}"
                 TextAlignment="Right"
                 LostFocus="TxbHours_OnLostFocus"
                 PreviewKeyDown="TxbHours_OnPreviewKeyDown"
