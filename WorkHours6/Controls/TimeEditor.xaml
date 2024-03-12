@@ -52,8 +52,8 @@
                         TargetType="Border">
                         <Style.Triggers>
                             <DataTrigger
-                                Binding="{Binding Data.LastStartTime}"
-                                Value="{x:Null}">
+                                Binding="{Binding Data.IsTimerEnabled}"
+                                Value="False">
                                 <Setter
                                     Property="Visibility"
                                     Value="Collapsed" />

@@ -55,7 +55,7 @@ public static class SettingsService
             ("#e8a0bf", "#9d2659"), // Dark Pink
             ("#867070", "#433838"), // Brown
             ("#84b4ff", "#004bc1"), // Light Blue
-            ("#b9f3fc", "#08b6d1"), // Light Light Blue
+            ("#b9f3fc", "#08b6d1"), // Very Light Blue
             ("#eae0da", "#906951"), // Brown
             ("#e8f3d6", "#81b033") // Light Green
         };

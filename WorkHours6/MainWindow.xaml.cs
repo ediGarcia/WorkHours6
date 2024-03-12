@@ -62,7 +62,7 @@ public partial class MainWindow : INotifyPropertyChanged
         AdjustWindowPosition();
         UpdateBalanceAndExtraHours();
 
-        SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
+        SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged; //Keeps window in the bottom left corner.
     }
 
     #region Events
@@ -85,7 +85,7 @@ public partial class MainWindow : INotifyPropertyChanged
     /// <param name="e"></param>
     private void BtnOkPopup_OnClick(object sender, RoutedEventArgs e)
     {
-        WorkTimeService.ToggleTimer(DateTime.Today + TpkTimePicker.SelectedTime);
+        WorkTimeService.WorkTime.ToggleTimer(DateTime.Today + TpkTimePicker.SelectedTime);
         PopSetTime.IsOpen = false;
     }
     #endregion
@@ -152,7 +152,7 @@ public partial class MainWindow : INotifyPropertyChanged
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void MniResetTime_OnClick(object sender, RoutedEventArgs e) =>
-        WorkTimeService.ResetTimer();
+        WorkTimeService.WorkTime.ResetTimer();
     #endregion
 
     #region MniSetTime_OnClick
@@ -222,7 +222,7 @@ public partial class MainWindow : INotifyPropertyChanged
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void TimeSpanProgressBar_Click(object? sender, EventArgs e) =>
-        WorkTimeService.ToggleTimer();
+        WorkTimeService.WorkTime.ToggleTimer();
     #endregion
 
     #endregion
@@ -242,7 +242,7 @@ public partial class MainWindow : INotifyPropertyChanged
 
     #region UpdateBalance
     /// <summary>
-    /// Updates the balance and the extra hours information.
+    /// Updates the balance and the extra hours' information.
     /// </summary>
     private void UpdateBalanceAndExtraHours()
     {

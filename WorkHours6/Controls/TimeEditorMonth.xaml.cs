@@ -170,19 +170,19 @@ public partial class TimeEditorMonth
     {
         TxbMonth.Text = Month switch
         {
-            1 => $"January, {Year:0000}",
-            2 => $"February, {Year:0000}",
-            3 => $"March, {Year:0000}",
-            4 => $"April, {Year:0000}",
-            5 => $"May, {Year:0000}",
-            6 => $"June, {Year:0000}",
-            7 => $"July, {Year:0000}",
-            8 => $"August, {Year:0000}",
-            9 => $"September, {Year:0000}",
-            10 => $"October, {Year:0000}",
-            11 => $"November, {Year:0000}",
-            12 => $"December, {Year:0000}",
-            _ => "December, 1991"
+            1 => $"January {Year:0000}",
+            2 => $"February {Year:0000}",
+            3 => $"March {Year:0000}",
+            4 => $"April {Year:0000}",
+            5 => $"May {Year:0000}",
+            6 => $"June {Year:0000}",
+            7 => $"July {Year:0000}",
+            8 => $"August {Year:0000}",
+            9 => $"September {Year:0000}",
+            10 => $"October {Year:0000}",
+            11 => $"November {Year:0000}",
+            12 => $"December {Year:0000}",
+            _ => "December 1991"
         };
 
         _entries = DataService.GetMonthReport(Month, Year);

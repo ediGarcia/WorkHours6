@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using WorkHours6.Models;
@@ -201,7 +202,7 @@ public static class DataService
     public static void SaveTimeData(DateTime date, TimeSpan workedHours, TimeSpan creditedHours, DateTime? lastStartTime, bool isTimerRunning)
     {
         if (workedHours == TimeSpan.Zero
-            && (creditedHours == TimeSpan.Zero || creditedHours == WorkTimeService.EightHours && date.IsWeekend())
+            && (creditedHours == TimeSpan.Zero || creditedHours == TimeSpan.FromHours(8) && date.IsWeekend())
             && !isTimerRunning)
         {
             using SqliteCommand command = CreateCommand();
@@ -216,16 +217,16 @@ public static class DataService
         int updatedRows;
         double workedSeconds = Math.Round(workedHours.TotalSeconds);
         double creditedSeconds = Math.Round(creditedHours.TotalSeconds);
-        object lastStartTimeValue = isTimerRunning && lastStartTime.HasValue ? lastStartTime.Value : DBNull.Value;
 
         using (SqliteCommand command = CreateCommand())
         {
             command.CommandText =
-                "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds WHERE Date=@Date";
+                "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds, IsTimerEnabled=@IsTimerEnabled WHERE Date=@Date";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeValue);
+            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
             command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
+            command.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
             updatedRows = command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -234,11 +235,12 @@ public static class DataService
         {
             using SqliteCommand command = CreateCommand();
             command.CommandText =
-                "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,CreditedSeconds) VALUES (@Date,@WorkedSeconds,@LastStartTime,@CreditedSeconds)";
+                "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,CreditedSeconds,IsTimerEnabled) VALUES (@Date,@WorkedSeconds,@LastStartTime,@CreditedSeconds,@IsTimerEnabled)";
             command.Parameters.AddWithValue("@Date", date);
             command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTimeValue);
+            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
             command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
+            command.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -259,7 +261,7 @@ public static class DataService
     private static SqliteCommand CreateCommand()
     {
         string databasePath = Path.Combine(
-            SystemMethods.GetParentDirectory(Assembly.GetExecutingAssembly().Location),
+            DirectoryMethods.GetParentDirectory(Assembly.GetExecutingAssembly().Location),
             @"Resources\timesheet.s3db");
 
         SqliteConnection connection = new($"DataSource={databasePath}");
@@ -274,13 +276,14 @@ public static class DataService
     /// </summary>
     /// <param name="reader"></param>
     /// <returns></returns>
-    private static TimeDatabaseEntry CreateDatabaseEntry(SqliteDataReader reader) =>
+    private static TimeDatabaseEntry CreateDatabaseEntry(DbDataReader reader) =>
         new(reader.GetDateTime("Date"))
         {
             Id = reader.GetInt32("Id"),
             WorkedTime = TimeSpan.FromSeconds(reader.GetInt32("WorkedSeconds")),
-            LastStartTime = reader["LastStartTime"] is DBNull ? null : reader.GetDateTime("LastStartTime"),
-            CreditedHours = TimeSpan.FromSeconds(reader.GetInt32("CreditedSeconds"))
+            LastStartTime = reader.GetDateTime("LastStartTime"),
+            CreditedHours = TimeSpan.FromSeconds(reader.GetInt32("CreditedSeconds")),
+            IsTimerEnabled = reader.GetBoolean("IsTimerEnabled")
         };
     #endregion
 

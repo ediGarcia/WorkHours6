@@ -92,7 +92,7 @@
                 Foreground="White"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="May, 1991"/>
+                Text="May 1991"/>
 
             <Border
                 Grid.Column="2"

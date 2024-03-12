@@ -23,9 +23,14 @@ public class TimeDatabaseEntry
     public int? Id { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the timer for the specified date is enabled.
+    /// </summary>
+    public bool IsTimerEnabled { get; set; }
+
+    /// <summary>
     /// Gets and sets the last update time of the current time entry.
     /// </summary>
-    public DateTime? LastStartTime { get; set; }
+    public DateTime LastStartTime { get; set; }
 
     /// <summary>
     /// Gets and ste the stored worked hours of the current time entry.
@@ -54,6 +59,7 @@ public class TimeDatabaseEntry
         {
             CreditedHours = CreditedHours,
             Id = Id,
+            IsTimerEnabled = IsTimerEnabled,
             LastStartTime = LastStartTime,
             WorkedTime = WorkedTime
         };
