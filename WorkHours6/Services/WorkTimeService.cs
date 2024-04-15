@@ -67,10 +67,7 @@ public static class WorkTimeService
                 DataService.GetTimeEntries(userSettings.BalanceStartDate, DateTime.Today.AddDays(-1));
             TimeSpan eightHours = TimeSpan.FromHours(8);
 
-            balance =
-                DateTimeMethods.RoundToMinutes(
-                    entries
-                        .Sum(_ => _.WorkedTime + _.CreditedHours - eightHours));
+            balance = entries.Sum(_ => DateTimeMethods.RoundToMinutes(_.WorkedTime) + _.CreditedHours - eightHours);
         }
 
         WorkTime.Balance = balance;
