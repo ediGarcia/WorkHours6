@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using WorkHours6.Services;
 #pragma warning disable CS8618
@@ -206,32 +205,6 @@ public partial class TimeSpanProgressBar
     /// <param name="e"></param>
     private void TimeLabel_Click(object? sender, EventArgs e) =>
         Click?.Invoke(this, e);
-    #endregion
-    
-    #region TxbBalance_OnMouseLeftButtonUp
-    /// <summary>
-    /// Shows the expected exit time.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void TxbBalance_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        TxbExitTime.Visibility = Visibility.Visible;
-        TxbBalance.Visibility = Visibility.Collapsed;
-    }
-    #endregion
-
-    #region TxbExitTime_OnMouseLeftButtonUp
-    /// <summary>
-    /// Shows the work hours balance.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void TxbExitTime_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        TxbBalance.Visibility = Visibility.Visible;
-        TxbExitTime.Visibility = Visibility.Collapsed;
-    }
     #endregion
 
     #endregion
