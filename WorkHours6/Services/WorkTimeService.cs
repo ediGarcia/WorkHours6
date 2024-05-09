@@ -85,7 +85,7 @@ public static class WorkTimeService
 
         if (userSettings.CalculateExtraHours
             && WorkTime.Balance != userSettings.TargetBalance
-            && userSettings.TargetBalanceDeadline >= DateTime.Today)
+            && userSettings.TargetBalanceDeadline > DateTime.Today)
         {
             TimeSpan eightHours = TimeSpan.FromHours(8);
             int workDaysCount = DataService
