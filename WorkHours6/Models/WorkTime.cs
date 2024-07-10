@@ -3,6 +3,8 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
+using WorkHours6.Services;
+
 #pragma warning disable CS8618
 
 namespace WorkHours6.Models;
@@ -162,6 +164,9 @@ public class WorkTime : INotifyPropertyChanged
 
             CurrentDate = DateTime.Today;
             ResetTimer();
+
+            WorkTimeService.UpdateCurrentBalance();
+            WorkTimeService.UpdateExtraHours();
         }
     }
     #endregion
