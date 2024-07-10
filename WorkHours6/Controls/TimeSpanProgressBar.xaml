@@ -110,6 +110,8 @@
                     <Grid.Resources>
                         <infra:BalanceToTextConverter
                             x:Key="BalanceToTextConverter" />
+                        <infra:ExitTimeToTextConverter
+                            x:Key="ExitTimeToTextConverter" />
                         <infra:ExtraHoursToTextConverter
                             x:Key="ExtraHoursToTextConverter" />
                     </Grid.Resources>
@@ -137,7 +139,7 @@
                         Grid.Column="1"
                         Margin="5, 0, 0, 0"
                         Style="{StaticResource InformationLabel}"
-                        Text="{Binding ExpectedExitTime, StringFormat='HH:mm', TargetNullValue='--:--'}"
+                        Text="{Binding ExpectedExitTime, Converter={StaticResource ExitTimeToTextConverter}}"
                         ToolTip="Exit time"/>
                     <TextBlock
                         x:Name="TbExtraHours"
