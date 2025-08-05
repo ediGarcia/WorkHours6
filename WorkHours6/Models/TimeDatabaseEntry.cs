@@ -1,9 +1,8 @@
-﻿using HelperExtensions;
-using System;
+﻿using System;
 
 namespace WorkHours6.Models;
 
-public class TimeDatabaseEntry
+public class TimeDatabaseEntry(DateTime date)
 {
     #region Properties
 
@@ -15,12 +14,7 @@ public class TimeDatabaseEntry
     /// <summary>
     /// Gets or sets the date of the current time entry.
     /// </summary>
-    public DateTime Date { get; }
-
-    /// <summary>
-    /// Gets and sets the ID of the current time entry.
-    /// </summary>
-    public int? Id { get; set; }
+    public DateTime Date { get; } = date;
 
     /// <summary>
     /// Gets or sets whether the timer for the specified date is enabled.
@@ -30,7 +24,7 @@ public class TimeDatabaseEntry
     /// <summary>
     /// Gets and sets the last update time of the current time entry.
     /// </summary>
-    public DateTime LastStartTime { get; set; }
+    public DateTime? LastStartTime { get; set; }
 
     /// <summary>
     /// Gets and ste the stored worked hours of the current time entry.
@@ -38,14 +32,6 @@ public class TimeDatabaseEntry
     public TimeSpan WorkedTime { get; set; }
 
     #endregion
-
-    public TimeDatabaseEntry(DateTime date)
-    {
-        Date = date.Date;
-
-        if (Date.IsWeekend())
-            CreditedHours = TimeSpan.FromHours(8);
-    }
 
     #region Public Methods
 
@@ -58,7 +44,6 @@ public class TimeDatabaseEntry
         new(Date)
         {
             CreditedHours = CreditedHours,
-            Id = Id,
             IsTimerEnabled = IsTimerEnabled,
             LastStartTime = LastStartTime,
             WorkedTime = WorkedTime

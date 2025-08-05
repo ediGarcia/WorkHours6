@@ -40,14 +40,10 @@ public static class WorkTimeService
     /// </summary>
     public static void UpdateCreditedHours()
     {
-        try
-        {
-            TimeDatabaseEntry databaseEntry = DataService.GetTimeEntry(DateTime.Today);
+        TimeDatabaseEntry databaseEntry = DataService.GetTimeEntry(DateTime.Today);
 
-            if (databaseEntry.CreditedHours != WorkTime.CreditedHours)
-                WorkTime.CreditedHours = databaseEntry.CreditedHours;
-        }
-        catch { }
+        if (databaseEntry.CreditedHours != WorkTime.CreditedHours)
+            WorkTime.CreditedHours = databaseEntry.CreditedHours;
     }
     #endregion
 

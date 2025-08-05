@@ -103,7 +103,7 @@ public class WorkTime : INotifyPropertyChanged
     /// <summary>
     /// Gets the last time the timer state has changed.
     /// </summary>
-    public DateTime LastStateChangeTime
+    public DateTime? LastStateChangeTime
     {
         get => _lastStateTimeChanged;
         set
@@ -126,7 +126,7 @@ public class WorkTime : INotifyPropertyChanged
     private DateTime _currentDate = DateTime.Today;
     private TimeSpan _extraHours;
     private readonly TimeSpan _eightHours = TimeSpan.FromHours(8);
-    private DateTime _lastStateTimeChanged = DateTime.Today;
+    private DateTime? _lastStateTimeChanged = DateTime.Today;
     // ReSharper disable once NotAccessedField.Local
     private readonly Timer _notificationTimer; // Prevents the timer from being collected by the GC.
     private readonly Stopwatch _stopwatch = new();

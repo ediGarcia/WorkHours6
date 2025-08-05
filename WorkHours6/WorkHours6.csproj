@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\relogio-digital.ico</ApplicationIcon>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,24 +19,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="HelperExtensions">
-      <HintPath>..\..\..\..\Dropbox\Projects\DLL\HelperExtensions.dll</HintPath>
-    </Reference>
-    <Reference Include="HelperMethods">
-      <HintPath>..\..\..\..\Dropbox\Projects\DLL\HelperMethods.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\relogio-digital.ico" />
-    <Content Include="Resources\timesheet.s3db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HelperExtensions">
+      <HintPath>..\..\_dll\HelperExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="HelperMethods">
+      <HintPath>..\..\_dll\HelperMethods.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,10 @@
 ﻿using HelperMethods;
 using System.Windows.Media;
 using WorkHours6.Models;
-#pragma warning disable CS8601 // Possible null reference assignment.
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+#pragma warning disable CS8601
+#pragma warning disable CS8600
+#pragma warning disable CS8618
 
 namespace WorkHours6.Services;
 
@@ -40,7 +41,8 @@ public static class SettingsService
 
     static SettingsService()
     {
-        (string ThemeBrush, string ThemeAccentBrush)[] themes = {
+        (string ThemeBrush, string ThemeAccentBrush)[] themes =
+        [
             ("#ecee81", "#9fa115"), // Yellow
             ("#89f3e4", "#11ac96"), // Green/Blue
             ("#82a4ff", "#0034c0"), // Blue
@@ -58,7 +60,7 @@ public static class SettingsService
             ("#b9f3fc", "#08b6d1"), // Very Light Blue
             ("#eae0da", "#906951"), // Brown
             ("#e8f3d6", "#81b033") // Light Green
-        };
+        ];
 
         int selectedThemeIndex = NumberMethods.GetRandomInt(0, themes.Length);
         BrushConverter converter = new();

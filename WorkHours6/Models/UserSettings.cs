@@ -36,15 +36,11 @@ public class UserSettings
 
     public UserSettings()
     {
-        try
-        {
-            UserSettingsDatabaseEntry entry = DataService.GetBalanceSettings();
+        UserSettingsDatabaseEntry entry = DataService.GetBalanceSettings();
 
-            BalanceStartDate = entry.BalanceStartDate;
-            CalculateExtraHours = entry.CalculateExtraHours;
-            TargetBalance = entry.TargetBalance;
-            TargetBalanceDeadline = entry.TargetBalanceDeadline;
-        }
-        catch { }
+        BalanceStartDate = entry.BalanceStartDate;
+        CalculateExtraHours = entry.CalculateExtraHours;
+        TargetBalance = entry.TargetBalance;
+        TargetBalanceDeadline = entry.TargetBalanceDeadline;
     }
 }

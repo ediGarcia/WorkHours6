@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.IO;
 using System.Reflection;
 using WorkHours6.Models;
+
 #pragma warning disable CS8602
 
 namespace WorkHours6.Services;
@@ -17,6 +18,40 @@ namespace WorkHours6.Services;
 /// </summary>
 public static class DataService
 {
+    private static readonly SqliteConnection Database;
+    private static readonly TimeSpan FullDayTime = TimeSpan.FromHours(8);
+
+    static DataService()
+    {
+        string databasePath = Path.Combine(DirectoryMethods.GetParentDirectory(Assembly.GetExecutingAssembly().Location), @"Resources\timesheet.s3db");
+
+        if (File.Exists(databasePath))
+        {
+            Database = new($"DataSource={databasePath}");
+            return;
+        }
+
+        string[] tableCommands =
+        [
+            "CREATE TABLE TimeEntries (Date DATE PRIMARY KEY NOT NULL, WorkedSeconds INTEGER NOT NULL DEFAULT 0, LastStartTime DATETIME, CreditedSeconds INTEGER NOT NULL DEFAULT 0, IsTimerEnabled INTEGER NOT NULL DEFAULT 0);",
+            "CREATE TABLE BalanceSettings (Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, StartDate DATE NOT NULL, CalculateExtraHours INTEGER NOT NULL DEFAULT 0, TargetBalance INTEGER NOT NULL DEFAULT 0, TargetBalanceDeadline DATE);",
+            $"INSERT INTO BalanceSettings (StartDate, CalculateExtraHours, TargetBalanceDeadline) VALUES ('{DateTimeMethods.GetFirstDayOfMonth():yyyy-MM-dd}', 1, '{DateTimeMethods.GetLastDayOfMonth():yyyy-MM-dd}');",
+            "CREATE TABLE Version (Id INTEGER DEFAULT 1 NOT NULL);",
+            "INSERT INTO Version (Id) VALUES (1);"
+        ];
+
+        using (Database = new($"DataSource={databasePath}"))
+        {
+            Database.Open();
+
+            foreach (string commandText in tableCommands)
+            {
+                using SqliteCommand tableCommand = new(commandText, Database);
+                tableCommand.ExecuteNonQuery();
+            }
+        }
+    }
+
     #region Public Methods
 
     #region GetBalanceSettings
@@ -26,21 +61,23 @@ public static class DataService
     /// <returns></returns>
     public static UserSettingsDatabaseEntry GetBalanceSettings()
     {
-        using SqliteCommand command = CreateCommand();
-        command.CommandText = "SELECT * FROM BalanceSettings";
+        using (Database)
+        {
+            Database.Open();
 
-        using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            using SqliteCommand command = new("SELECT * FROM BalanceSettings", Database);
+            using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            reader.Read();
 
-        return reader.Read()
-            ? new()
+            return new()
             {
                 Id = reader.GetInt32("Id"),
                 BalanceStartDate = reader.GetDateTime("StartDate"),
                 CalculateExtraHours = reader.GetBoolean("CalculateExtraHours"),
                 TargetBalance = TimeSpan.FromSeconds(reader.GetInt32("TargetBalance")),
                 TargetBalanceDeadline = reader.GetDateTime("TargetBalanceDeadline")
-            }
-            : new();
+            };
+        }
     }
     #endregion
 
@@ -87,37 +124,41 @@ public static class DataService
         if (end < start)
             throw new ArgumentException("The end date should not come before the start date.");
 
-        using SqliteCommand command = CreateCommand();
-
-        command.CommandText = "SELECT * FROM TimeEntries WHERE Date BETWEEN @start AND @end ORDER BY Date";
-        command.Parameters.AddWithValue("@start", start);
-        command.Parameters.AddWithValue("@end", end);
-
-        using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
-        List<TimeDatabaseEntry> entries = new((int)(end - start).TotalDays);
-        DateTime currentDateTime = start;
-
-        while (reader.Read())
+        using (Database)
         {
-            DateTime date = reader.GetDateTime("Date");
+            Database.Open();
 
-            while (date > currentDateTime)
+            using SqliteCommand command =
+                new("SELECT * FROM TimeEntries WHERE Date BETWEEN @start AND @end ORDER BY Date", Database);
+            command.Parameters.AddWithValue("@start", start);
+            command.Parameters.AddWithValue("@end", end);
+
+            using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            List<TimeDatabaseEntry> entries = new((int)(end - start).TotalDays);
+            DateTime currentDateTime = start;
+
+            while (reader.Read())
             {
-                entries.Add(new(currentDateTime));
+                DateTime date = reader.GetDateTime("Date");
+
+                while (date > currentDateTime)
+                {
+                    entries.Add(CreateDatabaseEntry(currentDateTime));
+                    currentDateTime = currentDateTime.AddDays(1);
+                }
+
+                entries.Add(CreateDatabaseEntry(reader));
                 currentDateTime = currentDateTime.AddDays(1);
             }
 
-            entries.Add(CreateDatabaseEntry(reader));
-            currentDateTime = currentDateTime.AddDays(1);
-        }
+            while (currentDateTime <= end)
+            {
+                entries.Add(CreateDatabaseEntry(currentDateTime));
+                currentDateTime = currentDateTime.AddDays(1);
+            }
 
-        while (currentDateTime <= end)
-        {
-            entries.Add(new(currentDateTime));
-            currentDateTime = currentDateTime.AddDays(1);
+            return entries;
         }
-
-        return entries;
     }
     #endregion
 
@@ -129,12 +170,16 @@ public static class DataService
     /// <returns></returns>
     public static TimeDatabaseEntry GetTimeEntry(DateTime targetDate)
     {
-        using SqliteCommand command = CreateCommand();
-        command.CommandText = "SELECT * FROM TimeEntries WHERE Date=@Date";
-        command.Parameters.AddWithValue("@Date", targetDate.Date);
+        using (Database)
+        {
+            Database.Open();
 
-        using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
-        return reader.Read() ? CreateDatabaseEntry(reader) : new(targetDate.Date);
+            using SqliteCommand command = new("SELECT * FROM TimeEntries WHERE Date=@Date", Database);
+            command.Parameters.AddWithValue("@Date", targetDate.Date);
+
+            using SqliteDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+            return reader.Read() ? CreateDatabaseEntry(reader) : CreateDatabaseEntry(targetDate.Date);
+        }
     }
     #endregion
 
@@ -149,31 +194,16 @@ public static class DataService
     /// <param name="calculateExtraHours"></param>
     public static void SaveBalanceSettings(DateTime startDate, TimeSpan targetBalance, DateTime targetBalanceDeadline, bool calculateExtraHours)
     {
-        int updatedRows;
-
-        using (SqliteCommand command = CreateCommand())
+        using (Database)
         {
-            command.CommandText =
-                "UPDATE BalanceSettings SET StartDate=@StartDate, TargetBalance=@TargetBalance, TargetBalanceDeadline=@TargetBalanceDeadline, CalculateExtraHours=@CalculateExtraHours";
-            command.Parameters.AddWithValue("@StartDate", startDate);
-            command.Parameters.AddWithValue("@TargetBalance", targetBalance.TotalSeconds);
-            command.Parameters.AddWithValue("@TargetBalanceDeadline", targetBalanceDeadline);
-            command.Parameters.AddWithValue("@CalculateExtraHours", calculateExtraHours);
-            updatedRows = command.ExecuteNonQuery();
-            command.Connection.Close();
-        }
+            Database.Open();
 
-        if (updatedRows == 0)
-        {
-            using SqliteCommand command = CreateCommand();
-            command.CommandText =
-                "INSERT INTO BalanceSettings(StartDate,TargetBalance,TargetBalanceDeadline,CalculateExtraHours) VALUES (@StartDate,@TargetBalance,@TargetBalanceDeadline,@CalculateExtraHours)";
+            using SqliteCommand command = new("UPDATE BalanceSettings SET StartDate=@StartDate, TargetBalance=@TargetBalance, TargetBalanceDeadline=@TargetBalanceDeadline, CalculateExtraHours=@CalculateExtraHours", Database);
             command.Parameters.AddWithValue("@StartDate", startDate);
             command.Parameters.AddWithValue("@TargetBalance", targetBalance.TotalSeconds);
             command.Parameters.AddWithValue("@TargetBalanceDeadline", targetBalanceDeadline);
             command.Parameters.AddWithValue("@CalculateExtraHours", calculateExtraHours);
             command.ExecuteNonQuery();
-            command.Connection.Close();
         }
     }
     #endregion
@@ -202,47 +232,50 @@ public static class DataService
     public static void SaveTimeData(DateTime date, TimeSpan workedHours, TimeSpan creditedHours, DateTime? lastStartTime, bool isTimerRunning)
     {
         if (workedHours == TimeSpan.Zero
-            && (creditedHours == TimeSpan.Zero || creditedHours == TimeSpan.FromHours(8) && date.IsWeekend())
+            && (creditedHours == TimeSpan.Zero || creditedHours == FullDayTime && date.IsWeekend())
             && !isTimerRunning)
         {
-            using SqliteCommand command = CreateCommand();
-            command.CommandText = "DELETE FROM TimeEntries WHERE Date=@Date";
-            command.Parameters.AddWithValue("@Date", date);
+            using (Database)
+            {
+                Database.Open();
 
-            command.ExecuteNonQuery();
-            command.Connection.Close();
-            return;
+                using SqliteCommand command = new("DELETE FROM TimeEntries WHERE Date=@Date", Database);
+                command.Parameters.AddWithValue("@Date", date);
+                command.ExecuteNonQuery();
+                return;
+            }
         }
 
-        int updatedRows;
         double workedSeconds = Math.Round(workedHours.TotalSeconds);
         double creditedSeconds = Math.Round(creditedHours.TotalSeconds);
 
-        using (SqliteCommand command = CreateCommand())
+        using (Database)
         {
-            command.CommandText =
-                "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds, IsTimerEnabled=@IsTimerEnabled WHERE Date=@Date";
-            command.Parameters.AddWithValue("@Date", date);
-            command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-            command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
-            command.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
-            updatedRows = command.ExecuteNonQuery();
-            command.Connection.Close();
-        }
+            Database.Open();
 
-        if (updatedRows == 0)
-        {
-            using SqliteCommand command = CreateCommand();
-            command.CommandText =
-                "INSERT INTO TimeEntries(Date,WorkedSeconds,LastStartTime,CreditedSeconds,IsTimerEnabled) VALUES (@Date,@WorkedSeconds,@LastStartTime,@CreditedSeconds,@IsTimerEnabled)";
-            command.Parameters.AddWithValue("@Date", date);
-            command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-            command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
-            command.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            using (SqliteCommand updateCommand =
+                   new(
+                       "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds, IsTimerEnabled=@IsTimerEnabled WHERE Date=@Date", Database))
+            {
+                updateCommand.Parameters.AddWithValue("@Date", date);
+                updateCommand.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
+                updateCommand.Parameters.AddWithValue("@LastStartTime", lastStartTime);
+                updateCommand.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
+                updateCommand.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
+
+                if (updateCommand.ExecuteNonQuery() > 0)
+                    return;
+            }
+
+            using SqliteCommand insertCommand =
+                new(
+                    "INSERT INTO TimeEntries(Date, WorkedSeconds, LastStartTime, CreditedSeconds, IsTimerEnabled) VALUES (@Date, @WorkedSeconds, @LastStartTime, @CreditedSeconds, @IsTimerEnabled)", Database);
+            insertCommand.Parameters.AddWithValue("@Date", date);
+            insertCommand.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
+            insertCommand.Parameters.AddWithValue("@LastStartTime", lastStartTime);
+            insertCommand.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
+            insertCommand.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
+            insertCommand.ExecuteNonQuery();
         }
     }
     #endregion
@@ -253,24 +286,19 @@ public static class DataService
 
     #region Private Methods
 
-    #region CreateConnection
-    /// <summary>
-    /// Creates and opens a database connection.
-    /// </summary>
-    /// <returns></returns>
-    private static SqliteCommand CreateCommand()
-    {
-        string databasePath = Path.Combine(
-            DirectoryMethods.GetParentDirectory(Assembly.GetExecutingAssembly().Location),
-            @"Resources\timesheet.s3db");
+    #region CreateDatabaseEntry*
 
-        SqliteConnection connection = new($"DataSource={databasePath}");
-        connection.Open();
-        return connection.CreateCommand();
-    }
+    #region CreateDatabaseEntry(DateTime)
+    /// <summary>
+    /// Creates an empty <see cref="TimeDatabaseEntry"/> instance from the specified date.
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns></returns>
+    private static TimeDatabaseEntry CreateDatabaseEntry(DateTime date) =>
+        new(date) { CreditedHours = date.IsWeekend() ? FullDayTime : TimeSpan.Zero };
     #endregion
 
-    #region CreateDatabaseEntry
+    #region CreateDatabaseEntry(DbDataReader)
     /// <summary>
     /// Creates a <see cref="TimeDatabaseEntry"/> instance from the specified <see cref="SqliteDataReader"/> data.
     /// </summary>
@@ -279,12 +307,13 @@ public static class DataService
     private static TimeDatabaseEntry CreateDatabaseEntry(DbDataReader reader) =>
         new(reader.GetDateTime("Date"))
         {
-            Id = reader.GetInt32("Id"),
             WorkedTime = TimeSpan.FromSeconds(reader.GetInt32("WorkedSeconds")),
-            LastStartTime = reader.GetDateTime("LastStartTime"),
+            LastStartTime = reader.IsDBNull("LastStartTime") ? null : reader.GetDateTime("LastStartTime"),
             CreditedHours = TimeSpan.FromSeconds(reader.GetInt32("CreditedSeconds")),
             IsTimerEnabled = reader.GetBoolean("IsTimerEnabled")
         };
+    #endregion
+
     #endregion
 
     #endregion
