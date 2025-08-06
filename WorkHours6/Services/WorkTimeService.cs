@@ -85,7 +85,7 @@ public static class WorkTimeService
         {
             TimeSpan eightHours = TimeSpan.FromHours(8);
             int workDaysCount = DataService
-                .GetTimeEntries(DateTime.Today.AddDays(1), userSettings.TargetBalanceDeadline)
+                .GetTimeEntries(DateTime.Today, userSettings.TargetBalanceDeadline)
                 .Count(_ => _.CreditedHours < eightHours);
 
             extraHours =

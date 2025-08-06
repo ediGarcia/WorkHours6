@@ -141,11 +141,8 @@ public static class DataService
             {
                 DateTime date = reader.GetDateTime("Date");
 
-                while (date > currentDateTime)
-                {
+                for(; currentDateTime < date; currentDateTime = currentDateTime.AddDays(1))
                     entries.Add(CreateDatabaseEntry(currentDateTime));
-                    currentDateTime = currentDateTime.AddDays(1);
-                }
 
                 entries.Add(CreateDatabaseEntry(reader));
                 currentDateTime = currentDateTime.AddDays(1);
@@ -253,29 +250,28 @@ public static class DataService
         {
             Database.Open();
 
-            using (SqliteCommand updateCommand =
+            using (SqliteCommand command =
                    new(
                        "UPDATE TimeEntries SET WorkedSeconds=@WorkedSeconds, LastStartTime=@LastStartTime, CreditedSeconds=@CreditedSeconds, IsTimerEnabled=@IsTimerEnabled WHERE Date=@Date", Database))
             {
-                updateCommand.Parameters.AddWithValue("@Date", date);
-                updateCommand.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-                updateCommand.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-                updateCommand.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
-                updateCommand.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
+                command.Parameters.AddWithValue("@Date", date);
+                command.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
 
-                if (updateCommand.ExecuteNonQuery() > 0)
-                    return;
+                if (lastStartTime.HasValue)
+                    command.Parameters.AddWithValue("@LastStartTime", lastStartTime);
+                else
+                    command.Parameters.AddWithValue("@LastStartTime", DBNull.Value);
+
+                command.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
+                command.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
+
+                if (command.ExecuteNonQuery() == 0)
+                {
+                    command.CommandText =
+                        "INSERT INTO TimeEntries(Date, WorkedSeconds, LastStartTime, CreditedSeconds, IsTimerEnabled) VALUES (@Date, @WorkedSeconds, @LastStartTime, @CreditedSeconds, @IsTimerEnabled)";
+                    command.ExecuteNonQuery();
+                }
             }
-
-            using SqliteCommand insertCommand =
-                new(
-                    "INSERT INTO TimeEntries(Date, WorkedSeconds, LastStartTime, CreditedSeconds, IsTimerEnabled) VALUES (@Date, @WorkedSeconds, @LastStartTime, @CreditedSeconds, @IsTimerEnabled)", Database);
-            insertCommand.Parameters.AddWithValue("@Date", date);
-            insertCommand.Parameters.AddWithValue("@WorkedSeconds", workedSeconds);
-            insertCommand.Parameters.AddWithValue("@LastStartTime", lastStartTime);
-            insertCommand.Parameters.AddWithValue("@CreditedSeconds", creditedSeconds);
-            insertCommand.Parameters.AddWithValue("@IsTimerEnabled", isTimerRunning);
-            insertCommand.ExecuteNonQuery();
         }
     }
     #endregion
